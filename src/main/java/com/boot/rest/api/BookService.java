@@ -1,13 +1,17 @@
 package com.boot.rest.api;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Component
 public class BookService {
+    private static final Logger logger = LoggerFactory.getLogger(BookService.class);
     private static List<Book> list = new ArrayList<>();
     static {
         list.add(new Book(1,"VS","Raman",120));
@@ -23,14 +27,23 @@ public class BookService {
     }
     //get books by id
     public Book getBookById(int id){
-        Book book;
-       book = list.stream().filter(e->e.getId()==id).findAny().orElse(null);
+        logger.info("Logger intialized to getBookById ");
+        Book book = null;
+        try{
+       book = list.stream().filter(e->e.getId()==id).findAny().orElse(null);}catch (NoSuchElementException e){
+            logger.error("Got an Error: ",e);
+            logger.info(" ID {} not found!!!",id);
+        }
         return book;
     }
     //get books by name
     public Book getBookByTitle(String title){
-        Book book;
-        book = list.stream().filter(e-> e.getTitle().equals(title)).findAny().orElse(null);
+        Book book = null;
+        try {
+            book = list.stream().filter(e -> e.getTitle().equals(title)).findAny().orElse(null);
+        }catch (NoSuchElementException e){
+            e.printStackTrace();
+        }
         return book;
     }
     //adding the book
@@ -39,7 +52,7 @@ public class BookService {
         return book;
     }
     //delete data
-    public void deleteBook(int id) {
+    public boolean deleteBook(int id) {
         list = list.stream().filter(book->{
             if(book.getId() != id){
                 return true;
@@ -50,6 +63,7 @@ public class BookService {
 
         //in sab ki jagaha
         //list = list.stream().filter(book -> book.getId() != bid).collect(Collectors.toList());
+        return false;
     }
 
     public void updateBook(Book book, int id) {
